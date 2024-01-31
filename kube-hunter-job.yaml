@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-hunter-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: kube-hunter
+        image: aquasec/kube-hunter
+          # command: ["kube-hunter",">","$(date +'%Y_%m_%d').txt"]
+          # command:
+          #   - "kube-hunter"
+        command:
+          - "/bin/sh"
+          - "-c"
+          - >
+            kube-hunter --pod > ./reports/kube_hunter_output_$(date +"%Y_%m_%d_%H_%M_%S").txt
+        args: ["--pod"]
+        volumeMounts:
+        - name: kube-hunter-pv-storage
+          mountPath: /reports
+      restartPolicy: OnFailure
+      volumes:
+      - name: kube-hunter-pv-storage
+        persistentVolumeClaim:
+          claimName: kube-hunter-pv-claim
+
